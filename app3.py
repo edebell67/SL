@@ -3,6 +3,9 @@ import pandas as pd
 import yfinance as yf
 import plotly.express as px
 
+# Set the page to wide mode
+st.set_page_config(layout="wide")
+
 # Define a function to fetch company information
 def get_company_info(ticker_symbol):
     ticker = yf.Ticker(ticker_symbol)
@@ -43,7 +46,7 @@ if st.sidebar.checkbox('View company info') or st.sidebar.checkbox('View chart')
             st.subheader(f'{ticker_symbol} - Stock Chart')
             fig = get_historical_data(ticker_symbol)
             st.plotly_chart(fig)
-            
+
 if st.sidebar.checkbox('View statistic'):
     st.header(f'{ticker_symbol} - Statistics')
     # Placeholder for statistical analysis code
