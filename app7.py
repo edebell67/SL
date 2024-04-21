@@ -75,26 +75,25 @@ with tab1:
 # Tab 2: Weekly Tradeable Summary
 with tab2:
     df_weekly = get_data("http://192.168.0.26:5002/api/execute_pg_query?queryId=pvw_tbl_algo_sum_net_by_tradeable_signal_by_wk")
+    if not df_weekly.empty:
+        # Extracting unique lists for filters
+        unique_ids = df_weekly['id'].unique().tolist()
+        unique_tradeables = df_weekly['tradeable'].unique().tolist()
+        unique_signals = df_weekly['signal'].unique().tolist()
 
-    # Sidebar - Filtering options for Tab 2
-    with st.sidebar:
-        st.header('Filter Options for Weekly Summary')
-        all_ids = df_weekly['ID'].unique().tolist()
-        all_tradeables = df_weekly['tradeable'].unique().tolist()
-        all_signals = df_weekly['signal'].unique().tolist()
+        # Sidebar - Filtering options for Tab 2
+        selected_id = st.sidebar.selectbox('Select ID', ['All'] + unique_ids, key='id')
+        selected_tradeable = st.sidebar.selectbox('Select Tradeable', ['All'] + unique_tradeables, key='tradeable')
+        selected_signal = st.sidebar.selectbox('Select Signal', ['All'] + unique_signals, key='signal')
 
-        selected_id = st.selectbox('Select ID', ['All'] + all_ids, key='id')
-        selected_tradeable = st.selectbox('Select Tradeable', ['All'] + all_tradeables, key='tradeable')
-        selected_signal = st.selectbox('Select Signal', ['All'] + all_signals, key='signal')
-
+        # Applying filters
         if selected_id != 'All':
-            df_weekly = df_weekly[df_weekly['ID'] == selected_id]
+            df_weekly = df_weekly[df_weekly['id'] == selected_id]
         if selected_tradeable != 'All':
             df_weekly = df_weekly[df_weekly['tradeable'] == selected_tradeable]
         if selected_signal != 'All':
             df_weekly = df_weekly[df_weekly['signal'] == selected_signal]
 
-    # Display the filtered DataFrame in Tab 2
-    st.write("Weekly Tradeable Summary Data")
-    st.dataframe(df_weekly, use_container_width=True)
-
+        # Display the filtered DataFrame in Tab 2
+        st.write("Weekly Tradeable Summary Data")
+        st.dataframe(df_weekly, use_container_width=True)
