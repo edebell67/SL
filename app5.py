@@ -7,7 +7,7 @@ import plotly.express as px
 st.set_page_config(layout="wide")
 
 # Function to get data from the API
-@st.experimental_memo(ttl=600)  # Updated caching mechanism
+@st.cache_data(ttl=600)  # Updated caching mechanism
 def get_trade_data():
     url = "http://192.168.0.26:5002/api/execute_query?queryId=qvw_latest_trades_output"
     response = requests.get(url)
@@ -32,11 +32,13 @@ show_temporal = st.sidebar.checkbox('Show Temporal Analysis of Trades', True)
 # Data filtering by trade category
 trade_categories = df['trade_category'].unique().tolist()
 selected_category = st.sidebar.selectbox('Select Trade Category', ['All'] + trade_categories)
-if selected_category != 'All':
-    df = df[df['trade_category'] == selected_category]
+
 
 # Main area - Analysis displayed across columns and rows
 col1, col2 = st.columns(2)
+
+# Display the DataFrame in the app using full width
+st.dataframe(df, width=None)
 
 # Trade Volume by Product
 if show_volume:
@@ -74,4 +76,7 @@ if show_temporal:
         fig = px.line(trades_over_time, title='Trades Over Time by Hour')
         st.plotly_chart(fig)
 
-# This layout uses two columns and places different charts based on the user's selection from the sidebar.
+# The above layout uses two columns and places different charts based on the user's selection from the sidebar.
+
+if selected_category != 'All':
+    df = df[df['trade_category'] == selected_category]
