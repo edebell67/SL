@@ -34,6 +34,9 @@ trade_categories = df['trade_category'].unique().tolist()
 selected_category = st.sidebar.selectbox('Select Trade Category', ['All'] + trade_categories)
 
 
+if selected_category != 'All':
+    df = df[df['trade_category'] == selected_category]
+
 # Main area - Analysis displayed across columns and rows
 col1, col2 = st.columns(2)
 
@@ -77,6 +80,3 @@ if show_temporal:
         st.plotly_chart(fig)
 
 # The above layout uses two columns and places different charts based on the user's selection from the sidebar.
-
-if selected_category != 'All':
-    df = df[df['trade_category'] == selected_category]
