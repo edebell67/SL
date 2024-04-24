@@ -18,7 +18,7 @@ def get_data(url):
 
 
 # Setting up the page
-st.set_page_config(layout="wide")
+#st.set_page_config(layout="wide")
 
 # Tabs for different views
 #tab1, tab2 = st.tabs(["Current Trades Analysis", "Weekly Tradeable Summary"])
