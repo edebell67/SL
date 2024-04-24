@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import requests
 import plotly.express as px
+from streamlit import session_state
 
 # Set the page to wide mode
 st.set_page_config(layout="wide")
@@ -14,6 +15,10 @@ def get_data(url):
     else:
         st.error("Failed to retrieve data. Please check the API or network connection.")
         return pd.DataFrame()
+
+
+# Setting up the page
+st.set_page_config(layout="wide")
 
 # Tabs for different views
 #tab1, tab2 = st.tabs(["Current Trades Analysis", "Weekly Tradeable Summary"])
@@ -63,33 +68,28 @@ with tab1:
             fig = px.line(trades_over_time, title='Trades Over Time by Hour')
             col1.plotly_chart(fig)
 
+
+# In Tab 2 of your Streamlit app
+# Assuming Tab 2 implementation here:
+
+
 with tab2:
     df_weekly = get_data("http://192.168.0.26:5002/api/execute_pg_query?queryId=pvw_tbl_algo_sum_net_by_tradeable_signal_by_wk")
-    st.write("Weekly Tradeable Summary Data")
-    st.dataframe(df_weekly, use_container_width=True)  # Display unfiltered data
-
-    # Sidebar - Filtering options for Tab 2
-    with st.sidebar:
-        st.header('Filter Options for Graphs Only')
-        selected_id = st.selectbox('Select ID for Graphs', ['All'] + df_weekly['id'].unique().tolist(), key='id_2')
-        selected_tradeable = st.selectbox('Select Tradeable for Graphs', ['All'] + df_weekly['tradeable'].unique().tolist(), key='tradeable_2')
-        selected_signal = st.selectbox('Select Signal for Graphs', ['All'] + df_weekly['signal'].unique().tolist(), key='signal_2')
-        show_net_graph = st.checkbox('Show Net Over Time', True, key='show_net_graph')
-
-    # Apply filtering directly before plotting graphs
-    if show_net_graph:
-        filtered_df = df_weekly.copy()
-        if selected_id != 'All':
-            filtered_df = filtered_df[filtered_df['id'] == int(selected_id)]
-        if selected_tradeable != 'All':
-            filtered_df = filtered_df[filtered_df['tradeable'] == int(selected_tradeable)]
-        if selected_signal != 'All':
-            filtered_df = filtered_df[filtered_df['signal'] == selected_signal]
-
-        filtered_df['update_time'] = pd.to_datetime(filtered_df['update_time'])
-        fig = px.line(filtered_df, x='update_time', y='net', title='Net Over Time', markers=True)
-        st.plotly_chart(fig, use_container_width=True)
-
+    if not df_weekly.empty:
+        st.write("Weekly Tradeable Summary Data")
+        # Display the dataframe using Streamlit
+        st.dataframe(df_weekly, use_container_width=True)
+        
+        # Example to select rows and display further details
+        # Assuming 'id' is a column in your dataframe
+        option = st.selectbox('Select ID for detail view:', df_weekly['id'].unique())
+        detailed_view = df_weekly[df_weekly['id'] == option]
+        
+        # Display details based on selected ID
+        if not detailed_view.empty:
+            st.write('Detailed View for ID:', option)
+            st.dataframe(detailed_view)
+  
 
 with tab3:
     df_trade_desc = get_data("http://192.168.0.26:5002/api/execute_query?queryId=qvw_get_trade_descritption")
