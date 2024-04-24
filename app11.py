@@ -74,45 +74,59 @@ with tab1:
 
 
 with tab2:
+with tab2:
     df_weekly = get_data("http://192.168.0.26:5002/api/execute_pg_query?queryId=pvw_tbl_algo_sum_net_by_tradeable_signal_by_wk")
     if not df_weekly.empty:
         st.write("Weekly Tradeable Summary Data")
-        st.dataframe(df_weekly, use_container_width=True)  # Display unfiltered data
+        # Display dataframe with a button in each row for selection
+        selected_indices = st.multiselect('Select rows:', df_weekly.index)
         
-        # Assuming 'id' is part of df_weekly and 'update_time' and 'net' columns exist
-        if st.button('Load Graph'):  # This is a placeholder, replace with an actual row selection mechanism
-            selected_data = df_weekly[df_weekly['id'] == df_weekly['id'].iloc[0]]  # Replace with actual selection logic
-            fig = px.line(selected_data, x='update_time', y='net', title='Net Over Time')
-            st.plotly_chart(fig, use_container_width=True)
+        if selected_indices:
+            # Assuming there's only one selection for simplicity; use selected_indices[0] for actual selection if multiple
+            selected_row = df_weekly.loc[selected_indices[0]]
+            filtered_df = df_weekly[(df_weekly['id'] == selected_row['id']) &
+                                    (df_weekly['signal'] == selected_row['signal']) &
+                                    (df_weekly['tradeable'] == selected_row['tradeable'])]
+            filtered_df = filtered_df.sort_values('update_time')  # Sorting by update_time
+            
+            if not filtered_df.empty:
+                fig = px.line(filtered_df, x='update_time', y='net', title='Net Over Time')
+                st.plotly_chart(fig, use_container_width=True)
+            else:
+                st.write("No data available for selected criteria.")
   
 
 with tab3:
     df_trade_desc = get_data("http://192.168.0.26:5002/api/execute_query?queryId=qvw_get_trade_descritption")
- # Sidebar filtering for Tab 3
-    with st.sidebar:
-        st.markdown("#### Trade Description Filters")  # Header for Tab 3
-        selected_id_tab3 = st.selectbox('Select ID for Descriptions', ['All'] + df_trade_desc['id'].unique().tolist(), key='id_tab3')
-        st.markdown("---")  # Adding a separator for Tab 3
+    if not df_trade_desc.empty:
+        # Sidebar filtering for Tab 3
+        with st.sidebar:
+            st.markdown("#### Trade Description Filters")  # Header for Tab 3
+            selected_id_tab3 = st.selectbox('Select ID for Descriptions', ['All'] + df_trade_desc['id'].unique().tolist(), key='id_tab3')
+            st.markdown("---")  # Adding a separator for Tab 3
 
-    # Apply ID filter if not 'All'
-    if selected_id_tab3 != 'All':
-        df_trade_desc = df_trade_desc[df_trade_desc['id'] == selected_id_tab3]
+        # Apply ID filter if not 'All'
+        if selected_id_tab3 != 'All':
+            df_trade_desc = df_trade_desc[df_trade_desc['id'] == selected_id_tab3]
 
-    trade_texts = "<br>".join([f"{row['entry_datetime']} - {row['trade_desc']}" for index, row in df_trade_desc.iterrows()])
+        # Filter for rows with positive and negative net_return and add HTML styling
+        trade_texts = []
+        for index, row in df_trade_desc.iterrows():
+            color = 'green' if row['net_return'] > 0 else 'red'
+            trade_texts.append(f"<span style='color: {color};'>{row['entry_datetime']} - {row['trade_desc']}</span><br>")
 
-    scrolling_text_html = f"""
-    <div style="height: 100vh; width: 100%; overflow: hidden; position: relative;">
-        <div style="position: absolute; width: 100%; height: 100%;
-                    animation: scroll-text 10s linear infinite;">
-            {trade_texts}
+        scrolling_text_html = f"""
+        <div style="height: 100vh; width: 100%; overflow: hidden; position: relative;">
+            <div style="position: absolute; width: 100%; height: 100%; animation: scroll-text 10s linear infinite;">
+                {''.join(trade_texts)}
+            </div>
         </div>
-    </div>
-    <style>
-    @keyframes scroll-text {{
-        0% {{ transform: translateY(100%); }}
-        100% {{ transform: translateY(-100%); }}
-    }}
-    </style>
-    """
+        <style>
+        @keyframes scroll-text {{
+            0% {{ transform: translateY(100%); }}
+            100% {{ transform: translateY(-100%); }}
+        }}
+        </style>
+        """
 
-    st.markdown(scrolling_text_html, unsafe_allow_html=True)
+        st.markdown(scrolling_text_html, unsafe_allow_html=True)
