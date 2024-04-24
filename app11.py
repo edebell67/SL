@@ -73,7 +73,7 @@ with tab1:
 # Assuming Tab 2 implementation here:
 
 
-with tab2:
+
 with tab2:
     df_weekly = get_data("http://192.168.0.26:5002/api/execute_pg_query?queryId=pvw_tbl_algo_sum_net_by_tradeable_signal_by_wk")
     if not df_weekly.empty:
