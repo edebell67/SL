@@ -143,7 +143,7 @@ with tab3:
 
         scrolling_text_html = f"""
         <div style="height: 100vh; width: 100%; overflow: hidden; position: relative;">
-            <div style="position: absolute; width: 100%; height: 100%; animation: scroll-text 30s linear infinite;">
+            <div style="position: absolute; width: 100%; height: 100%; animation: scroll-text 20s linear infinite;">
                 {''.join(trade_texts)}
             </div>
         </div>
