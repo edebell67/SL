@@ -74,7 +74,33 @@ with tab1:
 
 
 
+
 with tab2:
+    df_weekly = get_data("http://192.168.0.26:5002/api/execute_pg_query?queryId=pvw_tbl_algo_sum_net_by_tradeable_signal_by_wk")
+    st.write("Weekly Tradeable Summary Data")
+    st.dataframe(df_weekly, use_container_width=True)  # Display unfiltered data
+
+    # Sidebar - Filtering options for Tab 2
+    with st.sidebar:
+        st.header('Filter Options for Graphs Only')
+        selected_id = st.selectbox('Select ID for Graphs', ['All'] + df_weekly['id'].unique().tolist(), key='id_2')
+        selected_tradeable = st.selectbox('Select Tradeable for Graphs', ['All'] + df_weekly['tradeable'].unique().tolist(), key='tradeable_2')
+        selected_signal = st.selectbox('Select Signal for Graphs', ['All'] + df_weekly['signal'].unique().tolist(), key='signal_2')
+        show_net_graph = st.checkbox('Show Net Over Time', True, key='show_net_graph')
+
+    # Apply filtering directly before plotting graphs
+    if show_net_graph:
+        filtered_df = df_weekly.copy()
+        if selected_id != 'All':
+            filtered_df = filtered_df[filtered_df['id'] == int(selected_id)]
+        if selected_tradeable != 'All':
+            filtered_df = filtered_df[filtered_df['tradeable'] == int(selected_tradeable)]
+        if selected_signal != 'All':
+            filtered_df = filtered_df[filtered_df['signal'] == selected_signal]
+
+        filtered_df['update_time'] = pd.to_datetime(filtered_df['update_time'])
+        fig = px.line(filtered_df, x='update_time', y='net', title='Net Over Time', markers=True)
+        st.plotly_chart(fig, use_container_width=True)
     df_weekly = get_data("http://192.168.0.26:5002/api/execute_pg_query?queryId=pvw_tbl_algo_sum_net_by_tradeable_signal_by_wk")
     if not df_weekly.empty:
         st.write("Weekly Tradeable Summary Data")
