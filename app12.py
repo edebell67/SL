@@ -149,8 +149,8 @@ with tab3:
         </div>
         <style>
         @keyframes scroll-text {{
-            0%, 100% {{ transform: translateY(0); }}
-            50% {{ transform: translateY(-100%); }}
+            0% {{ transform: translateY(100%); }}
+            100% {{ transform: translateY(-100%); }}
         }}
         </style>
         """
