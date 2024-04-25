@@ -112,7 +112,7 @@ with tab3:
         # Filter for rows with positive and negative net_return and add HTML styling
         trade_texts = []
         for index, row in df_trade_desc.iterrows():
-            color = 'green' if row['net_return'] > 0 else 'red'
+            color = 'green' if row['net'] > 0 else 'red'
             trade_texts.append(f"<span style='color: {color};'>{row['entry_datetime']} - {row['trade_desc']}</span><br>")
 
         scrolling_text_html = f"""
